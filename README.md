@@ -21,3 +21,5 @@ For your analysis You can find and install the following packages from the url
 However, in order to clean all caches and generate new figs folder, type in your terminal :
         
             make cleaning 
+
+![PNG](https://github.com/Bahari95/Adaptive-Isogeometric-Analysis-using-optimal-transport-and-their-fast-solvers/blob/main/two%20_dimension/adaptive_meshes.png)
