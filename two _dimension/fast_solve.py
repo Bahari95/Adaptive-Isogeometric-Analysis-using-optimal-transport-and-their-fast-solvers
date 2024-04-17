@@ -8,7 +8,7 @@ from   simplines                    import quadratures_in_admesh
 #.. Prologation by knots insertion matrix
 from   simplines                    import prolongation_matrix
 # ... Using Kronecker algebra accelerated with Pyccel
-from   kronecker.fast_diag          import Poisson
+from   simplines                    import Poisson
 
 
 from gallery_section_06             import assemble_stiffnessmatrix1D
@@ -223,10 +223,9 @@ def picard_solve(V1, V2, V3, V4, V,  V00, V11, V01, V10, u11_mpH = None, u12_mpH
        
        for i in range(niter):
            
-           #---Assembles a right hand side of Poisson equation
-           #print( 'we here1 rhs', x11[:,0])
+           # ... computes spans and basis in adapted quadrature 
            spans_ad1, spans_ad2, basis_ad1, basis_ad2 = Quad_adm.ad_quadratures(u11, u12)
-           #print( 'we here1 rhs out', spans_ad1[:,:,:,0])           
+           #---Assembles a right hand side of Poisson equation
            rhs          = StencilVector(V11.vector_space)
            rhs          = assemble_rhs(V, fields = [u11, u12, u11_mpH, u12_mpH], value = [spans_ad1, spans_ad2, basis_ad1, basis_ad2], out= rhs)
            b            = rhs.toarray()
@@ -440,14 +439,17 @@ if True :
 	
 	# ... IP
 	geometry = 'fields/IP'
-	
+
+	# ... Butterfly
+	#geometry = 'fields/Butterfly'
+
 	# ... nelement = 2**nb_ne
 	nb_ne           = 6
 	
 	nelements, l2_Quality, MG_time, l2_displacement, x11uh , Vh01, x12uh , Vh10, xmp, ymp, Vhmp = Monge_ampere_equation(nb_ne, geometry= geometry, check = True)
 
 	#---Compute a solution
-	nbpts              = 100
+	nbpts              = 40
 	
 	#---Solution in uniform mesh
 	sx, uxx, uxy, X, Y = pyccel_sol_field_2d((nbpts,nbpts),  x11uh , Vh01.knots, Vh01.degree)
@@ -534,23 +536,139 @@ print('..../!\...: min~max value of the Jacobian function =', np.min(det),'~', n
 
 
 # ... test butterfly
-rho       = lambda x,y : 2.+np.sin(3.*np.pi*np.sqrt((x-0.6)**2+(y-0.6)**2)) 
+rho       = lambda x,y : 2.+np.sin(10.*np.pi*np.sqrt((x-0.6)**2+(y-0.6)**2)) 
+
+fig =plt.figure() 
+for i in range(nbpts):
+   phidx = X[:,i]
+   phidy = Y[:,i]
+
+   plt.plot(phidx, phidy, '-k', linewidth = 2.)
+for i in range(nbpts):
+   phidx = X[i,:]
+   phidy = Y[i,:]
+
+   plt.plot(phidx, phidy, '-k', linewidth = 2.)
+#plt.plot(u11_pH.toarray(), u12_pH.toarray(), 'ro', markersize=3.5)
+#~~~~~~~~~~~~~~~~~~~~
+#.. Plot the surface
+phidx = X[:,0]
+phidy = Y[:,0]
+plt.plot(phidx, phidy, 'm', linewidth=2., label = '$Im([0,1]^2_{y=0})$')
+# ...
+phidx = X[:,nbpts-1]
+phidy = Y[:,nbpts-1]
+plt.plot(phidx, phidy, 'b', linewidth=2. ,label = '$Im([0,1]^2_{y=1})$')
+#''
+phidx = X[0,:]
+phidy = Y[0,:]
+plt.plot(phidx, phidy, 'r',  linewidth=2., label = '$Im([0,1]^2_{x=0})$')
+# ...
+phidx = X[nbpts-1,:]
+phidy = Y[nbpts-1,:]
+plt.plot(phidx, phidy, 'g', linewidth= 2., label = '$Im([0,1]^2_{x=1}$)')
+
+#plt.xlim([-0.075,0.1])
+#plt.ylim([-0.25,-0.1])
+#axes[0].axis('off')
+plt.margins(0,0)
+fig.tight_layout()
+plt.savefig('Un_meshes_US.png')
+plt.show(block=False)
+plt.close()
+
+fig =plt.figure() 
+for i in range(nbpts):
+   phidx = F1[:,i]
+   phidy = F2[:,i]
+
+   plt.plot(phidx, phidy, '-k', linewidth = 2.)
+for i in range(nbpts):
+   phidx = F1[i,:]
+   phidy = F2[i,:]
+
+   plt.plot(phidx, phidy, '-k', linewidth = 2.)
+#plt.plot(u11_pH.toarray(), u12_pH.toarray(), 'ro', markersize=3.5)
+#~~~~~~~~~~~~~~~~~~~~
+#.. Plot the surface
+phidx = F1[:,0]
+phidy = F2[:,0]
+plt.plot(phidx, phidy, 'm', linewidth=2., label = '$Im([0,1]^2_{y=0})$')
+# ...
+phidx = F1[:,nbpts-1]
+phidy = F2[:,nbpts-1]
+plt.plot(phidx, phidy, 'b', linewidth=2. ,label = '$Im([0,1]^2_{y=1})$')
+#''
+phidx = F1[0,:]
+phidy = F2[0,:]
+plt.plot(phidx, phidy, 'r',  linewidth=2., label = '$Im([0,1]^2_{x=0})$')
+# ...
+phidx = F1[nbpts-1,:]
+phidy = F2[nbpts-1,:]
+plt.plot(phidx, phidy, 'g', linewidth= 2., label = '$Im([0,1]^2_{x=1}$)')
+
+#plt.xlim([-0.075,0.1])
+#plt.ylim([-0.25,-0.1])
+plt.axis('off')
+plt.margins(0,0)
+fig.tight_layout()
+plt.savefig('Un_meshes.png')
+plt.show(block=False)
+plt.close()
 
 #~~~~~~~~~~~~~~~
 # Adapted mesh  
 #~~~~~~~~~~~~~~~~~~~~
+fig =plt.figure() 
+for i in range(nbpts):
+   phidx = sx[:,i]
+   phidy = sy[:,i]
+
+   plt.plot(phidx, phidy, '-k', linewidth = 2.)
+for i in range(nbpts):
+   phidx = sx[i,:]
+   phidy = sy[i,:]
+
+   plt.plot(phidx, phidy, '-k', linewidth = 2.)
+#plt.plot(u11_pH.toarray(), u12_pH.toarray(), 'ro', markersize=3.5)
+#~~~~~~~~~~~~~~~~~~~~
+#.. Plot the surface
+phidx = sx[:,0]
+phidy = sy[:,0]
+plt.plot(phidx, phidy, 'm', linewidth=2., label = '$Im([0,1]^2_{y=0})$')
+# ...
+phidx = sx[:,nbpts-1]
+phidy = sy[:,nbpts-1]
+plt.plot(phidx, phidy, 'b', linewidth=2. ,label = '$Im([0,1]^2_{y=1})$')
+#''
+phidx = sx[0,:]
+phidy = sy[0,:]
+plt.plot(phidx, phidy, 'r',  linewidth=2., label = '$Im([0,1]^2_{x=0})$')
+# ...
+phidx = sx[nbpts-1,:]
+phidy = sy[nbpts-1,:]
+plt.plot(phidx, phidy, 'g', linewidth= 2., label = '$Im([0,1]^2_{x=1}$)')
+
+#plt.xlim([-0.075,0.1])
+#plt.ylim([-0.25,-0.1])
+#axes[0].axis('off')
+plt.margins(0,0)
+fig.tight_layout()
+plt.savefig('adaptive_meshes_US.png')
+plt.show(block=False)
+plt.close()
 #---------------------------------------------------------
 fig =plt.figure() 
 for i in range(nbpts):
    phidx = ux[:,i]
    phidy = uy[:,i]
 
-   plt.plot(phidx, phidy, '-b', linewidth = 0.25)
+   plt.plot(phidx, phidy, '-k', linewidth = 2.)
 for i in range(nbpts):
    phidx = ux[i,:]
    phidy = uy[i,:]
 
-   plt.plot(phidx, phidy, '-b', linewidth = 0.25)
+   plt.plot(phidx, phidy, '-k', linewidth = 2.)
 #plt.plot(u11_pH.toarray(), u12_pH.toarray(), 'ro', markersize=3.5)
 #~~~~~~~~~~~~~~~~~~~~
 #.. Plot the surface
@@ -572,7 +690,7 @@ plt.plot(phidx, phidy, 'g', linewidth= 2., label = '$Im([0,1]^2_{x=1}$)')
 
 #plt.xlim([-0.075,0.1])
 #plt.ylim([-0.25,-0.1])
-#axes[0].axis('off')
+plt.axis('off')
 plt.margins(0,0)
 fig.tight_layout()
 plt.savefig('adaptive_meshes.png')
