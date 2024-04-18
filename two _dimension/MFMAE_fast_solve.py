@@ -265,7 +265,7 @@ def picard_solve(V1, V2, V3, V4, V,  V00, V11, V01, V10, u11_mpH = None, u12_mpH
 # ....................Using Two or Multi grid method for soving MAE
 # #..................................................................
 
-def  Monge_ampere_equation(nb_ne, geometry = 'Circle', degree = None, times = None, check =None) :
+def  Monge_ampere_equation(nb_ne, geometry = 'fields/Circle', degree = None, times = None, check =None) :
 	#Degree of B-spline and number of elements
 	if nb_ne <=3 :
 	    print('please for the reason of sufficient mesh choose nb_ne strictly greater than 3')
