@@ -8,7 +8,7 @@ from   simplines                    import quadratures_in_admesh
 #.. Prologation by knots insertion matrix
 from   simplines                    import prolongation_matrix
 # ... Using Kronecker algebra accelerated with Pyccel
-from   simplines                    import Poisson
+from   kronecker.fast_diag          import Poisson
 
 
 from gallery_section_06             import assemble_stiffnessmatrix1D
@@ -291,11 +291,11 @@ def  Monge_ampere_equation(nb_ne, geometry = 'fields/Circle', degree = None, tim
 	VH10           = TensorSpace(V4H, V2H)
 	
 	# ... Assembling mapping
-	V1mpH          = SplineSpace(degree=2,   nelements= Hnelements, nderiv = 2, quad_degree = degree)
-	V2mpH          = SplineSpace(degree=2,   nelements= Hnelements, nderiv = 2, quad_degree = degree)	
+	V1mpH          = SplineSpace(degree=degree-1,   nelements= Hnelements, nderiv = 2, quad_degree = degree)
+	V2mpH          = SplineSpace(degree=degree-1,   nelements= Hnelements, nderiv = 2, quad_degree = degree)	
 	VHmp           = TensorSpace(V1mpH, V2mpH)
-	xmp            = np.loadtxt(geometry+'x_2_16.txt')
-	ymp            = np.loadtxt(geometry+'y_2_16.txt')
+	xmp            = np.loadtxt(geometry+'x_'+str(degree-1)+'_16.txt')
+	ymp            = np.loadtxt(geometry+'y_'+str(degree-1)+'_16.txt')
 	u11_mpH        = StencilVector(VHmp.vector_space)
 	u12_mpH        = StencilVector(VHmp.vector_space)
 	u11_mpH.from_array(VHmp, xmp)
@@ -325,8 +325,8 @@ def  Monge_ampere_equation(nb_ne, geometry = 'fields/Circle', degree = None, tim
 	   Vh10mg      = TensorSpace(V4mg, V2mg)
 	   
 	   # ... Assembling mapping
-	   V1mph       = SplineSpace(degree=2,   nelements= nelements, nderiv = 2, quad_degree = degree)
-	   V2mph       = SplineSpace(degree=2,   nelements= nelements, nderiv = 2, quad_degree = degree)	
+	   V1mph       = SplineSpace(degree=degree-1,   nelements= nelements, nderiv = 2, quad_degree = degree)
+	   V2mph       = SplineSpace(degree=degree-1,   nelements= nelements, nderiv = 2, quad_degree = degree)	
 	   Vhmp        = TensorSpace(V1mph, V2mph)
 		   
 	   Vhmg        = TensorSpace(V1mg, V2mg, V3mg, V4mg, V1mph, V2mph)
@@ -386,8 +386,8 @@ def  Monge_ampere_equation(nb_ne, geometry = 'fields/Circle', degree = None, tim
 	Vh10            = TensorSpace(V4, V2)
 
 	# ... Assembling mapping
-	V1mph           = SplineSpace(degree=2,   nelements= nelements, nderiv = 2, quad_degree = degree)
-	V2mph           = SplineSpace(degree=2,   nelements= nelements, nderiv = 2, quad_degree = degree)	
+	V1mph           = SplineSpace(degree=degree-1,   nelements= nelements, nderiv = 2, quad_degree = degree)
+	V2mph           = SplineSpace(degree=degree-1,   nelements= nelements, nderiv = 2, quad_degree = degree)	
 	Vhmp            = TensorSpace(V1mph, V2mph)
 		   
 	Vh              = TensorSpace(V1, V2, V3, V4, V1mph, V2mph)
@@ -424,7 +424,7 @@ def  Monge_ampere_equation(nb_ne, geometry = 'fields/Circle', degree = None, tim
 # # ........................................................
 # ....................For testing in one nelements
 # #.........................................................
-if True :
+if False :
 	# ... unite-squar 0.6
 	#geometry = 'fields/Squar'
 	
@@ -476,7 +476,7 @@ if True :
 # # ........................................................
 # ....................For generating tables
 # #.........................................................
-if False :
+if True :
 	degree          = 3
 	# ... new discretization for plot
 	nbpts           = 100
@@ -527,7 +527,7 @@ print('..../!\...: min~max value of the Jacobian function =', np.min(det),'~', n
 #         -++++++++++++++++++++++++++++++++++++++++++++++++++++ End of sharing part of any geometry-----------------------------------------------------------
 
 #.. Analytic Density function 
-#rho = lambda x,y : 1.+ 9./(1.+(10.*sqrt((x-0.7-0.25*0.)**2+(y-0.5)**2)*cos(arctan2(y-0.5,x-0.7-0.25*0.) -20.*((x-0.7-0.25*0.)**2+(y-0.5)**2)))**2)
+rho = lambda x,y : 1.+ 9./(1.+(10.*sqrt((x-0.-0.25*0.)**2+(y-0.)**2)*cos(arctan2(y-0.,x-0.-0.25*0.) -10.*((x-0.-0.25*0.)**2+(y-0.)**2)))**2)
 
 #rho = lambda x,y :1+5*np.exp(-100*np.abs((x-0.45)**2+(y-0.4)**2-0.09))+5.*np.exp(-100.*np.abs(x**2+y**2-0.2))+5.*np.exp(-100*np.abs((x+0.45)**2 +(y-0.4)**2-0.1))+7.*np.exp(-100.*np.abs(x**2+(y+1.25)**2-0.4))
 #.. Test 1  circle
@@ -536,19 +536,19 @@ print('..../!\...: min~max value of the Jacobian function =', np.min(det),'~', n
 
 
 # ... test butterfly
-rho       = lambda x,y : 2.+np.sin(10.*np.pi*np.sqrt((x-0.6)**2+(y-0.6)**2)) 
+#rho       = lambda x,y : 2.+np.sin(10.*np.pi*np.sqrt((x-0.6)**2+(y-0.6)**2)) 
 
 fig =plt.figure() 
 for i in range(nbpts):
    phidx = X[:,i]
    phidy = Y[:,i]
 
-   plt.plot(phidx, phidy, '-k', linewidth = 2.)
+   plt.plot(phidx, phidy, '-k', linewidth = .3)
 for i in range(nbpts):
    phidx = X[i,:]
    phidy = Y[i,:]
 
-   plt.plot(phidx, phidy, '-k', linewidth = 2.)
+   plt.plot(phidx, phidy, '-k', linewidth = .3)
 #plt.plot(u11_pH.toarray(), u12_pH.toarray(), 'ro', markersize=3.5)
 #~~~~~~~~~~~~~~~~~~~~
 #.. Plot the surface
@@ -582,12 +582,12 @@ for i in range(nbpts):
    phidx = F1[:,i]
    phidy = F2[:,i]
 
-   plt.plot(phidx, phidy, '-k', linewidth = 2.)
+   plt.plot(phidx, phidy, '-k', linewidth = .3)
 for i in range(nbpts):
    phidx = F1[i,:]
    phidy = F2[i,:]
 
-   plt.plot(phidx, phidy, '-k', linewidth = 2.)
+   plt.plot(phidx, phidy, '-k', linewidth = .3)
 #plt.plot(u11_pH.toarray(), u12_pH.toarray(), 'ro', markersize=3.5)
 #~~~~~~~~~~~~~~~~~~~~
 #.. Plot the surface
@@ -624,12 +624,12 @@ for i in range(nbpts):
    phidx = sx[:,i]
    phidy = sy[:,i]
 
-   plt.plot(phidx, phidy, '-k', linewidth = 2.)
+   plt.plot(phidx, phidy, '-k', linewidth = .3)
 for i in range(nbpts):
    phidx = sx[i,:]
    phidy = sy[i,:]
 
-   plt.plot(phidx, phidy, '-k', linewidth = 2.)
+   plt.plot(phidx, phidy, '-k', linewidth = .3)
 #plt.plot(u11_pH.toarray(), u12_pH.toarray(), 'ro', markersize=3.5)
 #~~~~~~~~~~~~~~~~~~~~
 #.. Plot the surface
@@ -663,12 +663,12 @@ for i in range(nbpts):
    phidx = ux[:,i]
    phidy = uy[:,i]
 
-   plt.plot(phidx, phidy, '-k', linewidth = 2.)
+   plt.plot(phidx, phidy, '-b', linewidth = .3)
 for i in range(nbpts):
    phidx = ux[i,:]
    phidy = uy[i,:]
 
-   plt.plot(phidx, phidy, '-k', linewidth = 2.)
+   plt.plot(phidx, phidy, '-b', linewidth = .3)
 #plt.plot(u11_pH.toarray(), u12_pH.toarray(), 'ro', markersize=3.5)
 #~~~~~~~~~~~~~~~~~~~~
 #.. Plot the surface
@@ -705,5 +705,42 @@ im2 = plt.contourf( F1, F2, Z, np.linspace(np.min(Z),np.max(Z),100), cmap= 'jet'
 #plt.colorbar(im2, cax=cax) 
 fig.tight_layout()
 plt.savefig('density_function.png')
+plt.show(block=False)
+plt.close()
+
+fig =plt.figure() 
+#axes[0].set_title( 'Physical domain ' )
+for i in range(nbpts):
+    phidx = ux[:,i]
+    phidy = uy[:,i]
+
+    plt.plot(phidx, phidy, '-b', linewidth = 0.54)
+for i in range(nbpts):
+    phidx = ux[i,:]
+    phidy = uy[i,:]
+
+    plt.plot(phidx, phidy, '-b', linewidth = 0.54)
+#plt.axis('off')
+#plt.margins(0,0)
+i     = 0
+phidx = F1[:,i]
+phidy = F2[:,i]
+plt.plot(phidx, phidy, '-r', linewidth = 2.)
+i     = nbpts-1
+phidx = F1[:,i]
+phidy = F2[:,i]
+plt.plot(phidx, phidy, '-r', linewidth = 2.)
+#''
+i     = 0
+phidx = F1[i,:]
+phidy = F2[i,:]
+plt.plot(phidx, phidy, '-r', linewidth = 2.)
+i     = nbpts-1
+phidx = F1[i,:]
+phidy = F2[i,:]
+plt.plot(phidx, phidy, '-r', linewidth = 2.)
+plt.xlim(0., 0.5)
+plt.ylim(0.5, 1.)
+plt.savefig('close_up_adaptive_meshes.png')
 plt.show(block=False)
 plt.close()
