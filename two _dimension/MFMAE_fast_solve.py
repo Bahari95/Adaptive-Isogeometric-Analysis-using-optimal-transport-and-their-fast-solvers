@@ -424,12 +424,12 @@ def  Monge_ampere_equation(nb_ne, geometry = 'fields/Circle', degree = None, tim
 # # ........................................................
 # ....................For testing in one nelements
 # #.........................................................
-if False :
+if True :
 	# ... unite-squar 0.6
 	#geometry = 'fields/Squar'
 	
 	# ... Circular domain
-	#geometry = 'fields/Circle'
+	geometry = 'fields/Circle'
 	
 	# ... Puzzle piece
 	#geometry = 'fields/Piece'
@@ -438,7 +438,7 @@ if False :
 	#geometry = 'fields/Quart'
 	
 	# ... IP
-	geometry = 'fields/IP'
+	#geometry = 'fields/IP'
 
 	# ... Butterfly
 	#geometry = 'fields/Butterfly'
@@ -449,7 +449,7 @@ if False :
 	nelements, l2_Quality, MG_time, l2_displacement, x11uh , Vh01, x12uh , Vh10, xmp, ymp, Vhmp = Monge_ampere_equation(nb_ne, geometry= geometry, check = True)
 
 	#---Compute a solution
-	nbpts              = 40
+	nbpts              = 100
 	
 	#---Solution in uniform mesh
 	sx, uxx, uxy, X, Y = pyccel_sol_field_2d((nbpts,nbpts),  x11uh , Vh01.knots, Vh01.degree)
@@ -473,10 +473,22 @@ if False :
 	headers          = ["degree", "$#$cells"," Err","CPU-time (s)", "Qual" ,"$min-det(PsiPsi)$", "$max_det(PsiPsi)$"]
 	print(tabulate(table, headers, tablefmt="github"),'\n')
 
+if False :
+	V1mpH          = SplineSpace(degree=2,   nelements= 16)
+	V2mpH          = SplineSpace(degree=2,   nelements= 16)	
+	VHmp           = TensorSpace(V1mpH, V2mpH)
+	xm             = np.loadtxt('fields/Butterflyx_'+str(2)+'_16.txt')*0.6+0.5
+	ym             = np.loadtxt('fields/Butterflyy_'+str(2)+'_16.txt')*0.6+0.5
+	nxm  = pyccel_sol_field_2d( None,  x11uh , Vh01.knots, Vh01.degree, meshes = (xm, ym))[0]
+	nym  = pyccel_sol_field_2d( None,  x12uh , Vh10.knots, Vh10.degree, meshes = (xm, ym))[0]	
+	X2 = pyccel_sol_field_2d((nbpts,nbpts),  nxm , VHmp.knots, VHmp.degree)[0]
+	Y2 = pyccel_sol_field_2d((nbpts,nbpts),  nym , VHmp.knots, VHmp.degree)[0]	
+	X1 = pyccel_sol_field_2d((nbpts,nbpts),  xm , VHmp.knots, VHmp.degree)[0]
+	Y1 = pyccel_sol_field_2d((nbpts,nbpts),  ym , VHmp.knots, VHmp.degree)[0]
 # # ........................................................
 # ....................For generating tables
 # #.........................................................
-if True :
+if False :
 	degree          = 3
 	# ... new discretization for plot
 	nbpts           = 100
@@ -527,7 +539,7 @@ print('..../!\...: min~max value of the Jacobian function =', np.min(det),'~', n
 #         -++++++++++++++++++++++++++++++++++++++++++++++++++++ End of sharing part of any geometry-----------------------------------------------------------
 
 #.. Analytic Density function 
-rho = lambda x,y : 1.+ 9./(1.+(10.*sqrt((x-0.-0.25*0.)**2+(y-0.)**2)*cos(arctan2(y-0.,x-0.-0.25*0.) -10.*((x-0.-0.25*0.)**2+(y-0.)**2)))**2)
+rho = lambda x,y : 1.+ 9./(1.+(10.*sqrt((x-0.5-0.25*0.)**2+(y-0.5)**2)*cos(arctan2(y-0.5,x-0.5-0.25*0.) -10.*((x-0.5-0.25*0.)**2+(y-0.5)**2)))**2)
 
 #rho = lambda x,y :1+5*np.exp(-100*np.abs((x-0.45)**2+(y-0.4)**2-0.09))+5.*np.exp(-100.*np.abs(x**2+y**2-0.2))+5.*np.exp(-100*np.abs((x+0.45)**2 +(y-0.4)**2-0.1))+7.*np.exp(-100.*np.abs(x**2+(y+1.25)**2-0.4))
 #.. Test 1  circle
